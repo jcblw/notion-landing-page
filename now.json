@@ -1,9 +1,17 @@
 {
+  "name": "Mujo",
   "version": 2,
-  "name": "spr-landing",
-  "regions": ["sfo"],
+  "alias": ["xn--muj-sxa.com"],
   "builds": [
     { "src": "image.js", "use": "@now/node" },
-    { "src": "package.json", "use": "@now/next" }
+    { "src": "package.json", "use": "@now/next" },
+    { "src": "api/*.js", "use": "@now/node" }
+  ],
+  "routes": [
+    {
+      "src": "/api/icon",
+      "headers": { "cache-control": "s-maxage=31536000" },
+      "dest": "/api/icon.js"
+    }
   ]
 }

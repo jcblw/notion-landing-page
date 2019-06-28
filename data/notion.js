@@ -1,92 +1,86 @@
 import fetch from "isomorphic-unfetch";
+import {
+  HEADER,
+  SUB_HEADER,
+  PAGE,
+  IMAGE,
+  TEXT,
+  LIST,
+  COLLECTION_VIEW
+} from "../components/block/constants";
 
-const PAGE_ID = "1a86e7f6-d6a5-4537-a2e5-15650c1888b8";
+const PAGE_ID = "d72177d8-f5c4-482e-8c14-ac771a017f95";
+
+const createCollectionBlock = async (value, block) => {
+  const collectionId = value.collection_id;
+  const col = await queryCollection({
+    collectionId,
+    collectionViewId: value.view_ids[0]
+  });
+
+  const table = [];
+  const entries = values(col.recordMap.block).filter(
+    block => block.value && block.value.parent_id === value.collection_id
+  );
+  for (const entry of entries) {
+    const props = entry.value.properties;
+    const [key] = Object.keys(props);
+    const title = props.title[0][0]
+      .toLowerCase()
+      .trim()
+      .replace(/[ -_]+/, "_");
+    table.push([title, props[key]]);
+  }
+
+  Object.assign(block, { table });
+  return col.recordMap.collection[collectionId].value.name[0][0];
+};
 
 export default async function getNotionData() {
   const data = await loadPageChunk({ pageId: PAGE_ID });
   const blocks = values(data.recordMap.block);
 
-  const sections = [];
-  let meta = {};
+  const nodes = [];
+  const tables = {};
 
   let currentSection = null;
 
   for (const block of blocks) {
-    const value = block.value;
+    const { value } = block;
+    const { type } = value;
+    const blockObj = { type };
 
-    if (
-      value.type === "page" ||
-      value.type === "header" ||
-      value.type === "sub_header"
-    ) {
-      sections.push({ title: value.properties.title, children: [] });
-      continue;
-    }
-
-    const section = sections[sections.length - 1];
-    let list = null;
-
-    if (value.type === "image") {
-      list = null;
-      const child = {
-        type: "image",
-        src: `/image.js?url=${encodeURIComponent(value.format.display_source)}`
-      };
-      section.children.push(child);
-    } else if (value.type === "text") {
-      list = null;
-      if (value.properties) {
-        section.children.push({
-          type: "text",
-          value: value.properties.title
+    switch (type) {
+      case PAGE:
+        Object.assign(blockObj, { children: value.properties.title });
+        break;
+      case HEADER:
+      case SUB_HEADER:
+      case TEXT:
+        const children = (value.properties && value.properties.title) || null;
+        Object.assign(blockObj, { children });
+        break;
+      case IMAGE:
+        Object.assign(blockObj, {
+          src: `/image.js?url=${encodeURIComponent(
+            value.format.display_source
+          )}`
         });
-      }
-    } else if (value.type === "bulleted_list") {
-      if (list == null) {
-        list = {
-          type: "list",
-          children: []
-        };
-        section.children.push(list);
-      }
-      list.children.push(value.properties.title);
-    } else if (value.type === "collection_view") {
-      const col = await queryCollection({
-        collectionId: value.collection_id,
-        collectionViewId: value.view_ids[0]
-      });
-      const table = {};
-      const entries = values(col.recordMap.block).filter(
-        block => block.value && block.value.parent_id === value.collection_id
-      );
-      for (const entry of entries) {
-        const props = entry.value.properties;
-
-        // I wonder what `Agd&` is? it seems to be a fixed property
-        // name that refers to the value
-        table[
-          props.title[0][0]
-            .toLowerCase()
-            .trim()
-            .replace(/[ -_]+/, "_")
-        ] = props["Agd&"];
-      }
-
-      if (sections.length === 1) {
-        meta = table;
-      } else {
-        section.children.push({
-          type: "table",
-          value: table
+        break;
+      case LIST:
+        Object.assign(blockObj, {
+          children: value.properties.title
         });
-      }
-    } else {
-      list = null;
-      console.log("UNHANDLED", value);
+        break;
+      case COLLECTION_VIEW:
+        const collectionName = await createCollectionBlock(value, blockObj);
+        tables[collectionName] = blockObj;
+        break;
     }
+    nodes.push(blockObj);
   }
 
-  return { sections, meta };
+  return { blocks: nodes, tables };
 }
 
 async function rpc(fnName, body = {}) {
