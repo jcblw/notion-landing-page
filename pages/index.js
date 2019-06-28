@@ -8,6 +8,7 @@ import getNotionData from "../data/notion";
 import { useFocus } from "../hooks/use-focus";
 import { Block } from "../components/block";
 import * as styles from "../styles/utils";
+import { colors } from "../styles/colors";
 import { getMetadata } from "../lib/metadata";
 
 if (typeof window !== "undefined") {
@@ -53,15 +54,23 @@ export default function Page({ blocks, etag, tables }) {
         )}
       </Head>
       <Box
-        backgroundColor="outerSpace"
+        display="flex"
+        direction="column"
+        css={{
+          background: `radial-gradient(ellipse at center, ${colors.gravel} 0%,${
+            colors.outerSpace
+          } 100%)`
+        }}
         color="mischka"
-        padding="l"
         flex="1"
-        css={{ maxWidth: "600px" }}
+        justifyContent="center"
+        alignItems="center"
       >
-        {blocks.map((block, i) => {
-          return <Block {...block} key={`block-${i}`} />;
-        })}
+        <Box padding="l" css={{ maxWidth: "600px" }} Component="article">
+          {blocks.map((block, i) => {
+            return <Block {...block} key={`block-${i}`} />;
+          })}
+        </Box>
       </Box>
     </Layout>
   );

@@ -24,12 +24,14 @@ const createCollectionBlock = async (value, block) => {
   );
   for (const entry of entries) {
     const props = entry.value.properties;
-    const [key] = Object.keys(props);
-    const title = props.title[0][0]
-      .toLowerCase()
-      .trim()
-      .replace(/[ -_]+/, "_");
-    table.push([title, props[key]]);
+    if (props) {
+      const [key] = Object.keys(props);
+      const title = props.title[0][0]
+        .toLowerCase()
+        .trim()
+        .replace(/[ -_]+/, "_");
+      table.push([title, props[key]]);
+    }
   }
 
   Object.assign(block, { table });
@@ -52,7 +54,10 @@ export default async function getNotionData() {
 
     switch (type) {
       case PAGE:
-        Object.assign(blockObj, { children: value.properties.title });
+        Object.assign(blockObj, {
+          children: value.properties.title,
+          src: `/image.js?url=${encodeURIComponent(value.format.page_icon)}`
+        });
         break;
       case HEADER:
       case SUB_HEADER:
