@@ -52,7 +52,13 @@ export default function Page({ blocks, etag, tables }) {
           <meta name="description" content={meta.description} />
         )}
       </Head>
-      <Box backgroundColor="outerSpace" color="mischka" padding="l" flex="1">
+      <Box
+        backgroundColor="outerSpace"
+        color="mischka"
+        padding="l"
+        flex="1"
+        css={{ maxWidth: "600px" }}
+      >
         {blocks.map((block, i) => {
           return <Block {...block} key={`block-${i}`} />;
         })}
