@@ -6,9 +6,9 @@ export const Link = props => {
   // TODO: inject theme here to make sure colors stay nice
   return (
     <Box
-      color="white"
       textDecoration="underline"
       Component="a"
+      color="inherit"
       href={props["data-value"]}
       {...props}
     />

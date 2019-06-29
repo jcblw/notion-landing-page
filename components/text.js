@@ -18,7 +18,7 @@ const elementMap = {
 };
 
 export const Text = props => {
-  if (!Array.isArray(props.children)) return null;
+  if (!Array.isArray(props.children)) return <Span>{props.children}</Span>;
   return props.children.map((chunk, i) => {
     let wrapper = <Span key={`child-${i}`}>{chunk[0]}</Span>;
 

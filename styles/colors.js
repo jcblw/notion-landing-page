@@ -1,10 +1,9 @@
 export const colors = {
-  outerSpace: "#353D42",
-  gravel: "#4D484E",
-  saltBox: "#756577",
-  mischka: "#EAE2EB",
+  black: "#000000",
   white: "#FFFFFF",
-  transparent: "transparent"
+  merlin: "#37352f",
+  transparent: "transparent",
+  inherit: "inherit"
 };
 
 export const getColor = colorName => colors[colorName];

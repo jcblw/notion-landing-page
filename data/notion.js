@@ -9,7 +9,7 @@ import {
   COLLECTION_VIEW
 } from "../components/block/constants";
 
-const PAGE_ID = "d72177d8-f5c4-482e-8c14-ac771a017f95";
+const PAGE_ID = "639148f0-49aa-4d1b-a233-cf5a7d4e5986";
 
 const createCollectionBlock = async (value, block) => {
   const collectionId = value.collection_id;
@@ -44,6 +44,7 @@ export default async function getNotionData() {
 
   const nodes = [];
   const tables = {};
+  const page = {};
 
   let currentSection = null;
 
@@ -53,12 +54,21 @@ export default async function getNotionData() {
     const blockObj = { type };
 
     switch (type) {
-      case PAGE:
-        Object.assign(blockObj, {
-          children: value.properties.title,
-          src: `/image.js?url=${encodeURIComponent(value.format.page_icon)}`
+      case PAGE: {
+        const isPage = Object.keys(page).length === 0;
+        const mergeObject = isPage ? page : blockObj;
+        console.log(value);
+        Object.assign(mergeObject, {
+          title: value.properties.title[0][0],
+          icon: formatImageUrl(value.format.page_icon),
+          cover: formatImageUrl(value.format.page_cover),
+          coverPosition: value.format.page_cover_position
         });
+        if (isPage) {
+          continue;
+        }
         break;
+      }
       case HEADER:
       case SUB_HEADER:
       case TEXT:
@@ -85,7 +95,7 @@ export default async function getNotionData() {
     nodes.push(blockObj);
   }
 
-  return { blocks: nodes, tables };
+  return Object.assign({}, page, { blocks: nodes, tables });
 }
 
 async function rpc(fnName, body = {}) {
@@ -168,6 +178,13 @@ function queryCollection({
       sort
     }
   });
+}
+
+function formatImageUrl(url) {
+  if (!url) return;
+  const hyper = /^http/.test(url);
+  const fullUrl = hyper ? url : `https://www.notion.so`;
+  return `/image.js?url=${encodeURIComponent(fullUrl)}`;
 }
 
 function loadPageChunk({

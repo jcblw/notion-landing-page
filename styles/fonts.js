@@ -1,7 +1,17 @@
 import { css } from "glamor";
 
 css.global("*", {
-  fontFamily: "'IBM Plex Sans', sans-serif",
+  fontFamily: [
+    "-apple-system",
+    "BlinkMacSystemFont",
+    "'Segoe UI'",
+    "Helvetica",
+    "'Apple Color Emoji'",
+    "Arial",
+    "sans-serif",
+    "'Segoe UI Emoji'",
+    "'Segoe UI Symbol'"
+  ].join(", "),
   WebkitFontSmoothing: "antialiased",
   MozOsxFontSmoothing: "grayscale"
 });

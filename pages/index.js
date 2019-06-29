@@ -7,9 +7,9 @@ import { Layout } from "../components/layout";
 import getNotionData from "../data/notion";
 import { useFocus } from "../hooks/use-focus";
 import { Block } from "../components/block";
+import { HeaderL } from "../components/fonts";
 import * as styles from "../styles/utils";
 import { colors } from "../styles/colors";
-import { getMetadata } from "../lib/metadata";
 
 if (typeof window !== "undefined") {
   rehydrate(window.__NEXT_DATA__.ids);
@@ -24,7 +24,19 @@ css.global("body, html, #__next", {
   flexDirection: "column"
 });
 
-export default function Page({ blocks, etag, tables }) {
+css.global("*", {
+  boxSizing: "border-box"
+});
+
+export default function Page({
+  blocks,
+  etag,
+  tables,
+  title,
+  cover,
+  coverPosition,
+  icon
+}) {
   const focused = useFocus();
   useEffect(
     () => {
@@ -43,30 +55,65 @@ export default function Page({ blocks, etag, tables }) {
     [focused]
   );
 
-  const meta = getMetadata(tables);
+  const coverPositionPercent = 100 - coverPosition * 100;
+  const maxWidth = "800px";
 
   return (
     <Layout>
       <Head>
-        {meta.title && <title>{meta.title}</title>}
-        {meta.description && (
-          <meta name="description" content={meta.description} />
-        )}
+        <title>{title}</title>
       </Head>
       <Box
         display="flex"
         direction="column"
-        css={{
-          background: `radial-gradient(ellipse at center, ${colors.gravel} 0%,${
-            colors.outerSpace
-          } 100%)`
-        }}
-        color="mischka"
+        backgroundColor="white"
+        color="merlin"
         flex="1"
-        justifyContent="center"
         alignItems="center"
       >
-        <Box padding="l" css={{ maxWidth: "600px" }} Component="article">
+        {cover ? (
+          <Box
+            css={{
+              backgroundSize: "cover",
+              backgroundPosition: `center ${coverPositionPercent}%`,
+              backgroundImage: `url("${cover}")`,
+              height: "30vh",
+              width: "100vw"
+            }}
+          />
+        ) : (
+          <Box
+            css={{
+              height: "10vh"
+            }}
+          />
+        )}
+        <Box
+          display="block"
+          direction="column"
+          paddingLeft="l"
+          paddingRight="l"
+          css={{ marginTop: icon ? "-80px" : "24px", maxWidth, width: "100%" }}
+        >
+          {icon && (
+            <Box
+              Component="img"
+              src={icon}
+              css={{
+                height: "124px",
+                width: "124px"
+              }}
+            />
+          )}
+          {title && <HeaderL>{title}</HeaderL>}
+        </Box>
+        <Box
+          paddingLeft="l"
+          paddingRight="l"
+          paddingBottom="l"
+          css={{ maxWidth }}
+          Component="article"
+        >
           {blocks.map((block, i) => {
             return <Block {...block} key={`block-${i}`} />;
           })}
